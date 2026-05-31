@@ -56,6 +56,21 @@ DATABASE_URL=postgresql://<user>:<password>@<host>/<db>?sslmode=require
 
 テーブル（`board_state`）はアプリが初回アクセス時に自動作成します（`CREATE TABLE IF NOT EXISTS`）。
 
+## 書き込み保護（任意・推奨）
+
+このアプリは単一の共有ボードを持ち、`GET /api/state`（閲覧）は公開です（内容は配信用の回数・予想のみ）。
+**書き込み（`PUT`）を保護したい場合**は、環境変数 `BOARD_WRITE_TOKEN` を設定します。
+
+```bash
+# .env.local（および Vercel の環境変数）
+BOARD_WRITE_TOKEN=<任意の十分長いランダム文字列>
+```
+
+- 設定すると、`PUT` は `x-board-token` ヘッダーが一致する場合のみ許可されます（定数時間比較）。
+- 操作者は画面右の「**編集トークン**」欄に同じ値を入力します（端末の localStorage に保存。DB やバンドルには含まれません）。
+- 未設定の場合は誰でも書き込み可能（後方互換）。URL を知る第三者の改ざんを防ぐには設定を推奨します。
+- リクエストボディは 1MB 上限、状態は件数・桁数に上限を設けています（巨大ペイロード対策）。
+
 ## Vercel へのデプロイ
 
 ### 方法A: Vercel CLI（このディレクトリから直接）
@@ -72,7 +87,7 @@ vercel env add DATABASE_URL preview
 vercel env add DATABASE_URL development
 ```
 
-フレームワークは自動で Next.js として検出されます。**`DATABASE_URL` の登録だけ必須**です。
+フレームワークは自動で Next.js として検出されます。**`DATABASE_URL` の登録だけ必須**で、`BOARD_WRITE_TOKEN`（書き込み保護）は任意です。
 
 ### 方法B: GitHub 連携
 

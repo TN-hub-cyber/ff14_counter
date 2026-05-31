@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createInitialState } from '@/lib/constants'
 import { createId } from '@/lib/id'
-import { fetchRemoteState, saveRemoteState } from '@/lib/remote'
+import { fetchRemoteState, saveRemoteState, UnauthorizedError } from '@/lib/remote'
 import {
   addPrediction,
   adjustCount,
@@ -17,7 +17,7 @@ import { loadPersistedState, persistState } from '@/lib/storage'
 import type { AppState, Prediction } from '@/lib/types'
 
 /** DB 同期の状態 */
-export type SyncStatus = 'loading' | 'saving' | 'saved' | 'offline'
+export type SyncStatus = 'loading' | 'saving' | 'saved' | 'offline' | 'denied'
 
 /** 変更を DB へ保存するまでの待ち時間（連打をまとめる） */
 const SAVE_DEBOUNCE_MS = 600
@@ -82,8 +82,10 @@ export function useAppState(): UseAppStateResult {
             if (cancelled) return
             lastSyncedRef.current = JSON.stringify(seed)
             setSyncStatus('saved')
-          } catch {
-            if (!cancelled) setSyncStatus('offline')
+          } catch (error) {
+            if (!cancelled) {
+              setSyncStatus(error instanceof UnauthorizedError ? 'denied' : 'offline')
+            }
           }
         }
       } catch {
@@ -119,7 +121,9 @@ export function useAppState(): UseAppStateResult {
           lastSyncedRef.current = json
           setSyncStatus('saved')
         })
-        .catch(() => setSyncStatus('offline'))
+        .catch((error) =>
+          setSyncStatus(error instanceof UnauthorizedError ? 'denied' : 'offline'),
+        )
     }, SAVE_DEBOUNCE_MS)
 
     return () => {

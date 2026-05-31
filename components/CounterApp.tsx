@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { BoardTokenField } from './BoardTokenField'
 import { PredictionForm } from './PredictionForm'
 import { PredictionList } from './PredictionList'
 import { RulesNote } from './RulesNote'
@@ -55,6 +56,14 @@ export function CounterApp() {
     try {
       const text = await file.text()
       const next = parseImportedState(text)
+      // インポートは全端末で共有されるボード状態を上書きし、DB にも保存される破壊的操作
+      if (
+        !window.confirm(
+          '読み込んだ内容で全員分のボード状態を上書きし、データベースにも保存します。よろしいですか？',
+        )
+      ) {
+        return
+      }
       app.replaceState(next)
       setImportError(null)
     } catch (error) {
@@ -108,6 +117,10 @@ export function CounterApp() {
         onResetCounts={handleResetCounts}
         onResetAll={handleResetAll}
       />
+
+      <div className="flex justify-end">
+        <BoardTokenField />
+      </div>
 
       {importError ? (
         <p className="rounded-lg bg-rose-900/40 px-4 py-2 text-sm text-rose-200 ring-1 ring-rose-500/40">

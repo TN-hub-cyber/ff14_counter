@@ -41,4 +41,32 @@ describe('parseImportedState', () => {
     }
     expect(() => parseImportedState(JSON.stringify(bad))).toThrow()
   })
+
+  it('rejects oversized counts (DoS guard)', () => {
+    const bad = {
+      streamers: [{ id: 's-0', name: 'x', englishCount: 9_999_999 }],
+      predictions: [],
+      gilPerWord: 10000,
+    }
+    expect(() => parseImportedState(JSON.stringify(bad))).toThrow()
+  })
+
+  it('rejects too many predictions (DoS guard)', () => {
+    const predictions = Array.from({ length: 2001 }, (_, i) => ({
+      id: `p-${i}`,
+      listenerName: `name-${i}`,
+      predictedCount: 1,
+    }))
+    const bad = { streamers: [], predictions, gilPerWord: 10000 }
+    expect(() => parseImportedState(JSON.stringify(bad))).toThrow()
+  })
+
+  it('rejects an over-long listener name', () => {
+    const bad = {
+      streamers: [],
+      predictions: [{ id: 'p1', listenerName: 'a'.repeat(61), predictedCount: 1 }],
+      gilPerWord: 10000,
+    }
+    expect(() => parseImportedState(JSON.stringify(bad))).toThrow()
+  })
 })

@@ -12,6 +12,11 @@ const STATUS_MAP: Record<
     dot: 'bg-rose-400',
     text: 'text-rose-200',
   },
+  denied: {
+    label: '書き込み権限なし（編集トークン要確認）',
+    dot: 'bg-rose-400',
+    text: 'text-rose-200',
+  },
 }
 
 export function SyncStatus({ status }: { status: SyncStatusValue }) {

@@ -17,22 +17,26 @@ const LISTENER_RULES = [
 
 export function RulesNote() {
   return (
-    <details className="rounded-2xl bg-slate-800/40 p-4 ring-1 ring-white/5">
-      <summary className="cursor-pointer text-sm font-bold text-slate-300">
-        配信ルール（メモ）
+    <details className="ff-panel px-5 py-4">
+      <summary className="ff-jp cursor-pointer list-none text-sm font-bold text-[var(--gold)]">
+        ❖ 配信ルール（メモ）
       </summary>
-      <div className="mt-3 grid gap-4 sm:grid-cols-2">
+      <div className="mt-4 grid gap-5 sm:grid-cols-2">
         <div>
-          <h3 className="mb-1 text-xs font-bold text-amber-300">★ 配信者ルール</h3>
-          <ul className="list-disc space-y-1 pl-5 text-xs text-slate-400">
+          <h3 className="ff-jp mb-2 text-xs font-bold tracking-widest text-[var(--gold-bright)]">
+            ★ 配信者ルール
+          </h3>
+          <ul className="ff-jp list-disc space-y-1 pl-5 text-xs text-[var(--muted)]">
             {STREAMER_RULES.map((rule) => (
               <li key={rule}>{rule}</li>
             ))}
           </ul>
         </div>
         <div>
-          <h3 className="mb-1 text-xs font-bold text-sky-300">★ リスナールール</h3>
-          <ul className="list-disc space-y-1 pl-5 text-xs text-slate-400">
+          <h3 className="ff-jp mb-2 text-xs font-bold tracking-widest text-[var(--crystal)]">
+            ★ リスナールール
+          </h3>
+          <ul className="ff-jp list-disc space-y-1 pl-5 text-xs text-[var(--muted)]">
             {LISTENER_RULES.map((rule) => (
               <li key={rule}>{rule}</li>
             ))}

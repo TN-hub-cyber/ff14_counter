@@ -10,6 +10,7 @@ import { SummaryBar } from './SummaryBar'
 import { SyncStatus } from './SyncStatus'
 import { Toolbar } from './Toolbar'
 import { useAppState } from '@/hooks/useAppState'
+import { streamerGil } from '@/lib/gil'
 import { rankPredictions, totalCount, totalGil } from '@/lib/state'
 import {
   buildExportFile,
@@ -25,6 +26,17 @@ function buildExportFilename(): string {
   return `ff14-counter-${stamp}.json`
 }
 
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-4">
+      <span className="ff-jp shrink-0 text-sm font-bold tracking-[0.3em] text-[var(--gold)]">
+        {children}
+      </span>
+      <div className="ff-rule" />
+    </div>
+  )
+}
+
 export function CounterApp() {
   const app = useAppState()
   const { state } = app
@@ -33,10 +45,7 @@ export function CounterApp() {
 
   const total = totalCount(state)
   const gil = totalGil(state)
-  const ranked = useMemo(
-    () => rankPredictions(state, sortKey),
-    [state, sortKey],
-  )
+  const ranked = useMemo(() => rankPredictions(state, sortKey), [state, sortKey])
 
   const closest = useMemo(() => {
     if (state.predictions.length === 0) return null
@@ -46,6 +55,19 @@ export function CounterApp() {
       return currentDiff < bestDiff ? current : best
     })
   }, [state.predictions, total])
+
+  const topPayerId = useMemo(() => {
+    let bestId: string | null = null
+    let bestGil = 0
+    for (const streamer of state.streamers) {
+      const value = streamerGil(streamer.englishCount, state.gilPerWord, state.kiribanGil)
+      if (value > bestGil) {
+        bestGil = value
+        bestId = streamer.id
+      }
+    }
+    return bestId
+  }, [state.streamers, state.gilPerWord, state.kiribanGil])
 
   function handleExport() {
     const file = buildExportFile(state, new Date().toISOString())
@@ -86,17 +108,21 @@ export function CounterApp() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-6">
-      <header className="flex flex-col gap-1">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h1 className="text-2xl font-black text-white sm:text-3xl">
-            英語禁止配信 カウンター
-          </h1>
+    <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-7 px-4 py-6 sm:px-6 lg:py-10">
+      <header className="ff-rise relative flex flex-col items-center gap-3 pt-1 text-center">
+        <div className="absolute right-0 top-0">
           <SyncStatus status={app.syncStatus} />
         </div>
-        <p className="text-sm text-slate-400">
-          配信者ごとの英語（カタカナ語）回数をカウント。リスナーは「全員の合計回数」を予想します。
+        <p className="ff-display text-[10px] tracking-[0.5em] text-[var(--gold)]/70 sm:text-xs">
+          EORZEA · NO-ENGLISH CHALLENGE
         </p>
+        <h1 className="ff-display ff-gold-text text-4xl font-black leading-tight sm:text-6xl">
+          英語禁止配信 カウンター
+        </h1>
+        <p className="ff-jp text-xs text-[var(--muted)] sm:text-sm">
+          配信者のカタカナ語をカウント／リスナーは「全員の合計回数」を予想
+        </p>
+        <div className="ff-rule-diamond mt-1 w-full max-w-2xl" />
       </header>
 
       <SummaryBar
@@ -106,41 +132,20 @@ export function CounterApp() {
         closest={closest}
       />
 
-      <Toolbar
-        gilPerWord={state.gilPerWord}
-        kiribanGil={state.kiribanGil}
-        onGilPerWordChange={app.setGilPerWord}
-        onKiribanGilChange={app.setKiribanGil}
-        onRefresh={app.refresh}
-        onExport={handleExport}
-        onImportFile={handleImportFile}
-        onResetCounts={handleResetCounts}
-        onResetAll={handleResetAll}
-      />
-
-      <div className="flex justify-end">
-        <BoardTokenField />
-      </div>
-
-      {importError ? (
-        <p className="rounded-lg bg-rose-900/40 px-4 py-2 text-sm text-rose-200 ring-1 ring-rose-500/40">
-          {importError}
-        </p>
-      ) : null}
-
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-bold text-slate-200">配信者カウント</h2>
+      <section className="flex flex-col gap-4">
+        <SectionTitle>❖ 配信者カウント</SectionTitle>
         <StreamerGrid
           streamers={state.streamers}
           gilPerWord={state.gilPerWord}
           kiribanGil={state.kiribanGil}
+          topPayerId={topPayerId}
           onAdjust={app.adjustCount}
           onSetCount={app.setCount}
         />
       </section>
 
-      <section className="flex flex-col gap-3 rounded-2xl bg-slate-800/40 p-4 ring-1 ring-white/5">
-        <h2 className="text-lg font-bold text-slate-200">リスナー予想（合計回数）</h2>
+      <section className="ff-panel flex flex-col gap-4 p-5 sm:p-6">
+        <SectionTitle>❖ リスナー予想（合計回数）</SectionTitle>
         <PredictionForm onAdd={app.addPrediction} />
         <PredictionList
           ranked={ranked}
@@ -151,10 +156,38 @@ export function CounterApp() {
         />
       </section>
 
+      <details className="ff-panel group px-5 py-4">
+        <summary className="ff-jp flex cursor-pointer list-none items-center justify-between text-sm font-bold text-[var(--gold)]">
+          <span>⚙ 設定・データ管理</span>
+          <span className="text-xs font-normal text-[var(--muted)]">開閉</span>
+        </summary>
+        <div className="mt-5 flex flex-col gap-4">
+          <Toolbar
+            gilPerWord={state.gilPerWord}
+            kiribanGil={state.kiribanGil}
+            onGilPerWordChange={app.setGilPerWord}
+            onKiribanGilChange={app.setKiribanGil}
+            onRefresh={app.refresh}
+            onExport={handleExport}
+            onImportFile={handleImportFile}
+            onResetCounts={handleResetCounts}
+            onResetAll={handleResetAll}
+          />
+          <div className="flex justify-end">
+            <BoardTokenField />
+          </div>
+          {importError ? (
+            <p className="ff-jp rounded-lg border border-rose-500/40 bg-rose-950/40 px-4 py-2 text-sm text-[var(--rose)]">
+              {importError}
+            </p>
+          ) : null}
+        </div>
+      </details>
+
       <RulesNote />
 
-      <footer className="pb-4 text-center text-xs text-slate-600">
-        データはデータベースに自動保存され、複数端末で共有されます（オフライン時は端末内に一時保存）。バックアップは「エクスポート」から。
+      <footer className="ff-jp pb-4 text-center text-xs text-[var(--muted)]/70">
+        データはデータベースに自動保存され、複数端末で共有されます（オフライン時は端末内に一時保存）。
       </footer>
     </div>
   )

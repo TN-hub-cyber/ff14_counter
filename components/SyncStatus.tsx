@@ -22,7 +22,9 @@ const STATUS_MAP: Record<
 export function SyncStatus({ status }: { status: SyncStatusValue }) {
   const { label, dot, text } = STATUS_MAP[status]
   return (
-    <span className={`inline-flex items-center gap-2 text-xs font-medium ${text}`}>
+    <span
+      className={`ff-jp inline-flex items-center gap-2 rounded-full border border-[var(--border-gold)] bg-black/30 px-3 py-1 text-xs font-medium ${text}`}
+    >
       <span className={`h-2 w-2 rounded-full ${dot}`} aria-hidden />
       {label}
     </span>

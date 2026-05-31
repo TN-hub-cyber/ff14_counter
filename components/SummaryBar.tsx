@@ -7,25 +7,6 @@ interface SummaryBarProps {
   closest: { listenerName: string; predictedCount: number } | null
 }
 
-interface StatProps {
-  label: string
-  value: string
-  accent?: string
-  sub?: string
-}
-
-function Stat({ label, value, accent = 'text-white', sub }: StatProps) {
-  return (
-    <div className="flex flex-col gap-1 rounded-xl bg-slate-800/60 px-4 py-3 ring-1 ring-white/5">
-      <span className="text-xs font-medium text-slate-400">{label}</span>
-      <span className={`text-2xl font-bold tabular-nums sm:text-3xl ${accent}`}>
-        {value}
-      </span>
-      {sub ? <span className="text-xs text-slate-400">{sub}</span> : null}
-    </div>
-  )
-}
-
 export function SummaryBar({
   totalCount,
   totalGil,
@@ -33,24 +14,44 @@ export function SummaryBar({
   closest,
 }: SummaryBarProps) {
   return (
-    <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      <Stat
-        label="合計 英語回数"
-        value={`${formatNumber(totalCount)} 回`}
-        accent="text-amber-300"
-      />
-      <Stat
-        label="没収額 合計"
-        value={formatGilMan(totalGil)}
-        accent="text-emerald-300"
-      />
-      <Stat label="予想 件数" value={`${formatNumber(predictionCount)} 件`} />
-      <Stat
-        label="現在の最有力予想"
-        value={closest ? closest.listenerName : '—'}
-        accent="text-sky-300"
-        sub={closest ? `予想 ${formatNumber(closest.predictedCount)} 回` : '予想なし'}
-      />
+    <section className="ff-panel ff-rise grid grid-cols-1 items-center gap-6 px-6 py-7 sm:grid-cols-[1fr_auto_1fr] sm:gap-4">
+      {/* 左: 合計英語回数 */}
+      <div className="flex flex-col items-center sm:items-start">
+        <span className="ff-jp text-[11px] tracking-[0.35em] text-[var(--muted)]">
+          合計 英語回数
+        </span>
+        <span className="ff-numeral mt-1 text-4xl font-bold text-[var(--crystal)] sm:text-5xl">
+          {formatNumber(totalCount)}
+          <span className="ff-jp ml-1 text-base text-[var(--muted)]">回</span>
+        </span>
+        <span className="ff-jp mt-1 text-xs text-[var(--muted)]">
+          予想 {formatNumber(predictionCount)} 件
+        </span>
+      </div>
+
+      {/* 中央: 総没収額（主役） */}
+      <div className="flex flex-col items-center px-2 text-center">
+        <span className="ff-jp text-xs tracking-[0.5em] text-[var(--gold)]/85">
+          総 没 収 額
+        </span>
+        <span className="ff-numeral ff-gold-text ff-hero-glow mt-1 text-6xl font-black leading-none sm:text-7xl">
+          {formatGilMan(totalGil)}
+        </span>
+        <div className="ff-rule-diamond mt-3 w-40" />
+      </div>
+
+      {/* 右: 最有力予想 */}
+      <div className="flex flex-col items-center sm:items-end">
+        <span className="ff-jp text-[11px] tracking-[0.35em] text-[var(--muted)]">
+          最有力予想者
+        </span>
+        <span className="ff-jp mt-1 max-w-full truncate text-3xl font-bold text-[var(--ink)] sm:text-4xl">
+          {closest ? closest.listenerName : '—'}
+        </span>
+        <span className="ff-jp mt-1 text-xs text-[var(--muted)]">
+          {closest ? `予想 ${formatNumber(closest.predictedCount)} 回` : '予想なし'}
+        </span>
+      </div>
     </section>
   )
 }

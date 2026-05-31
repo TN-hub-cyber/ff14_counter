@@ -1,7 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Shippori+Mincho:wght@500;600;700;800&display=swap');
 @import "tailwindcss";
 
 :root {
   color-scheme: dark;
+  --bg-0: #06060c;
+  --bg-1: #0c0d18;
+  --gold: #d4af37;
+  --gold-bright: #f6e3a1;
+  --gold-deep: #8f6f28;
+  --crystal: #6fe0e6;
+  --ink: #f2e8d0;
+  --muted: #a79db0;
+  --rose: #f0a3ac;
+  --panel: rgba(17, 16, 27, 0.66);
+  --panel-strong: rgba(22, 20, 34, 0.86);
+  --border-gold: rgba(212, 175, 55, 0.32);
+  --border-gold-strong: rgba(212, 175, 55, 0.62);
 }
 
 html,
@@ -10,9 +24,157 @@ body {
 }
 
 body {
-  background-color: #0b1120;
-  color: #e5e7eb;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Hiragino Kaku Gothic ProN",
-    "Hiragino Sans", "Noto Sans JP", Meiryo, sans-serif;
+  background-color: var(--bg-0);
+  color: var(--ink);
+  font-family: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  background-image:
+    radial-gradient(1200px 620px at 50% -12%, rgba(212, 175, 55, 0.2), transparent 60%),
+    radial-gradient(880px 520px at 86% 8%, rgba(111, 224, 230, 0.09), transparent 55%),
+    radial-gradient(1000px 720px at 8% 102%, rgba(212, 175, 55, 0.07), transparent 60%),
+    linear-gradient(180deg, var(--bg-1), var(--bg-0) 70%);
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
+}
+
+/* フィルムグレイン（質感） */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.045;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ===== タイポグラフィ ===== */
+.ff-display {
+  font-family: "Cinzel", "Shippori Mincho", serif;
+  letter-spacing: 0.04em;
+}
+.ff-numeral {
+  font-family: "Cinzel", "Shippori Mincho", serif;
+  font-feature-settings: "lnum" 1;
+  letter-spacing: 0.01em;
+}
+.ff-jp {
+  font-family: "Shippori Mincho", serif;
+}
+
+.ff-gold-text {
+  background: linear-gradient(176deg, var(--gold-bright) 0%, var(--gold) 46%, var(--gold-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ===== パネル（彫金フレーム） ===== */
+.ff-panel {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--border-gold);
+  border-radius: 16px;
+  backdrop-filter: blur(9px);
+  box-shadow:
+    0 14px 40px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+/* 上辺の金ライン */
+.ff-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0 16% auto 16%;
+  top: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-gold-strong), transparent);
+}
+
+.ff-rule {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, var(--border-gold-strong) 50%, transparent);
+}
+/* ダイヤ装飾付き区切り */
+.ff-rule-diamond {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-gold-strong) 50%, transparent);
+}
+.ff-rule-diamond::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: var(--gold);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.7);
+}
+
+/* ===== アニメーション ===== */
+@keyframes ff-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes ff-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 22px rgba(212, 175, 55, 0.25);
+  }
+  50% {
+    text-shadow: 0 0 40px rgba(212, 175, 55, 0.55);
+  }
+}
+@keyframes ff-kiriban {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(212, 175, 55, 0.6),
+      0 0 28px rgba(186, 120, 255, 0.32);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(246, 227, 161, 0.95),
+      0 0 52px rgba(186, 120, 255, 0.6);
+  }
+}
+
+.ff-rise {
+  animation: ff-rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.ff-hero-glow {
+  animation: ff-glow 3.6s ease-in-out infinite;
+}
+.ff-kiriban {
+  animation: ff-kiriban 1.7s ease-in-out infinite;
+}
+
+/* スクロールバー */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.35);
+  border-radius: 99px;
+}
+::selection {
+  background: rgba(212, 175, 55, 0.3);
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ff-rise,
+  .ff-hero-glow,
+  .ff-kiriban {
+    animation: none;
+  }
 }

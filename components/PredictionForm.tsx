@@ -7,6 +7,9 @@ interface PredictionFormProps {
   onAdd: (input: { listenerName: string; predictedCount: number }) => void
 }
 
+const inputClass =
+  'ff-jp rounded-lg border border-[var(--border-gold)] bg-black/30 px-3 py-2 text-sm text-[var(--ink)] placeholder:text-[var(--muted)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/70'
+
 export function PredictionForm({ onAdd }: PredictionFormProps) {
   const [listenerName, setListenerName] = useState('')
   const [predictedCount, setPredictedCount] = useState('')
@@ -40,7 +43,7 @@ export function PredictionForm({ onAdd }: PredictionFormProps) {
           onChange={(event) => setListenerName(event.target.value)}
           placeholder="リスナー名"
           maxLength={60}
-          className="flex-1 rounded-lg bg-slate-900 px-3 py-2 text-sm text-white ring-1 ring-white/10 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400"
+          className={`flex-1 ${inputClass}`}
           aria-label="リスナー名"
         />
         <input
@@ -50,17 +53,17 @@ export function PredictionForm({ onAdd }: PredictionFormProps) {
           value={predictedCount}
           onChange={(event) => setPredictedCount(event.target.value)}
           placeholder="予想合計回数"
-          className="w-full rounded-lg bg-slate-900 px-3 py-2 text-sm text-white ring-1 ring-white/10 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400 sm:w-40"
+          className={`w-full sm:w-40 ${inputClass}`}
           aria-label="予想合計回数"
         />
         <button
           type="submit"
-          className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-sky-400 active:bg-sky-600"
+          className="ff-jp rounded-lg border border-[var(--border-gold-strong)] bg-gradient-to-b from-[#f6e3a1] to-[#bb942f] px-5 py-2 text-sm font-bold text-[#2a210a] transition hover:from-[#fcefc4] hover:to-[#d0a534] active:translate-y-px"
         >
           追加
         </button>
       </div>
-      {error ? <p className="text-sm text-rose-400">{error}</p> : null}
+      {error ? <p className="ff-jp text-sm text-[var(--rose)]">{error}</p> : null}
     </form>
   )
 }

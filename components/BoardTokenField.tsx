@@ -24,7 +24,7 @@ export function BoardTokenField() {
   }
 
   return (
-    <label className="flex items-center gap-2 text-xs text-slate-400">
+    <label className="ff-jp flex items-center gap-2 text-xs text-[var(--muted)]">
       <span className="shrink-0">編集トークン（任意）</span>
       <input
         type="password"
@@ -32,7 +32,7 @@ export function BoardTokenField() {
         onChange={(event) => handleChange(event.target.value)}
         placeholder="サーバーで保護時のみ入力"
         autoComplete="off"
-        className="w-48 rounded-lg bg-slate-900 px-2 py-1 text-white ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-slate-400"
+        className="w-48 rounded-lg border border-[var(--border-gold)] bg-black/30 px-2 py-1 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/70"
         aria-label="編集トークン（サーバーが要求する場合のみ）"
       />
     </label>

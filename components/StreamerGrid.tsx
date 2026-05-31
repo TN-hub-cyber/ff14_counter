@@ -7,6 +7,7 @@ interface StreamerGridProps {
   streamers: readonly Streamer[]
   gilPerWord: number
   kiribanGil: number
+  unit: string
   topPayerId: string | null
   onAdjust: (streamerId: string, delta: number) => void
   onSetCount: (streamerId: string, value: number) => void
@@ -16,6 +17,7 @@ export function StreamerGrid({
   streamers,
   gilPerWord,
   kiribanGil,
+  unit,
   topPayerId,
   onAdjust,
   onSetCount,
@@ -28,6 +30,7 @@ export function StreamerGrid({
           streamer={streamer}
           gilPerWord={gilPerWord}
           kiribanGil={kiribanGil}
+          unit={unit}
           isTopPayer={streamer.id === topPayerId}
           index={index}
           onAdjust={onAdjust}

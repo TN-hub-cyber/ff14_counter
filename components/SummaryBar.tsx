@@ -1,8 +1,9 @@
-import { formatGilMan, formatNumber } from '@/lib/format'
+import { formatAmountMan, formatNumber } from '@/lib/format'
 
 interface SummaryBarProps {
   totalCount: number
   totalGil: number
+  unit: string
   predictionCount: number
   leader: { listenerName: string; wins: number } | null
 }
@@ -10,15 +11,16 @@ interface SummaryBarProps {
 export function SummaryBar({
   totalCount,
   totalGil,
+  unit,
   predictionCount,
   leader,
 }: SummaryBarProps) {
   return (
     <section className="ff-panel ff-rise grid grid-cols-1 items-center gap-6 px-6 py-7 sm:grid-cols-[1fr_auto_1fr] sm:gap-4">
-      {/* 左: 合計英語回数 */}
+      {/* 左: 合計NGワード回数 */}
       <div className="flex flex-col items-center sm:items-start">
         <span className="ff-jp text-[11px] tracking-[0.35em] text-[var(--muted)]">
-          合計 英語回数
+          合計 NGワード回数
         </span>
         <span className="ff-numeral mt-1 text-4xl font-bold text-[var(--crystal)] sm:text-5xl">
           {formatNumber(totalCount)}
@@ -35,7 +37,7 @@ export function SummaryBar({
           総 没 収 額
         </span>
         <span className="ff-numeral ff-gold-text ff-hero-glow mt-1 text-6xl font-black leading-none sm:text-7xl">
-          {formatGilMan(totalGil)}
+          {formatAmountMan(totalGil, unit)}
         </span>
         <div className="ff-rule-diamond mt-3 w-40" />
       </div>

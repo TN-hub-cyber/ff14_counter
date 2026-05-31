@@ -12,6 +12,9 @@ import {
   setCount,
   setGilPerWord,
   setKiribanGil,
+  setParticipantCount,
+  setStreamerName,
+  setUnit,
 } from '@/lib/state'
 import { loadPersistedState, persistState } from '@/lib/storage'
 import type { AppState, Prediction } from '@/lib/types'
@@ -34,6 +37,9 @@ export interface AppActions {
   removePrediction: (predictionId: string) => void
   setGilPerWord: (value: number) => void
   setKiribanGil: (value: number) => void
+  setUnit: (unit: string) => void
+  setStreamerName: (streamerId: string, name: string) => void
+  setParticipantCount: (count: number) => void
   replaceState: (next: AppState) => void
   resetAll: () => void
 }
@@ -172,6 +178,11 @@ export function useAppState(): UseAppStateResult {
         setState((current) => setGilPerWord(current, value)),
       setKiribanGil: (value) =>
         setState((current) => setKiribanGil(current, value)),
+      setUnit: (unit) => setState((current) => setUnit(current, unit)),
+      setStreamerName: (streamerId, name) =>
+        setState((current) => setStreamerName(current, streamerId, name)),
+      setParticipantCount: (count) =>
+        setState((current) => setParticipantCount(current, count)),
       replaceState: (next) => setState(next),
       resetAll: () => setState(createInitialState()),
     }),

@@ -5,8 +5,10 @@ import { useRef, useState } from 'react'
 interface ToolbarProps {
   gilPerWord: number
   kiribanGil: number
+  unit: string
   onGilPerWordChange: (value: number) => void
   onKiribanGilChange: (value: number) => void
+  onUnitChange: (unit: string) => void
   onRefresh: () => void
   onExport: () => void
   onImportFile: (file: File) => void
@@ -17,8 +19,10 @@ interface ToolbarProps {
 export function Toolbar({
   gilPerWord,
   kiribanGil,
+  unit,
   onGilPerWordChange,
   onKiribanGilChange,
+  onUnitChange,
   onRefresh,
   onExport,
   onImportFile,
@@ -28,6 +32,7 @@ export function Toolbar({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [gilText, setGilText] = useState(String(gilPerWord))
   const [kiribanText, setKiribanText] = useState(String(kiribanGil))
+  const [unitText, setUnitText] = useState(unit)
 
   function commitGil() {
     const value = gilText.trim() === '' ? 0 : Number(gilText)
@@ -45,6 +50,15 @@ export function Toolbar({
     } else {
       setKiribanText(String(kiribanGil))
     }
+  }
+
+  function commitUnit() {
+    const next = unitText.trim()
+    if (next === '') {
+      setUnitText(unit)
+      return
+    }
+    onUnitChange(next)
   }
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -71,13 +85,13 @@ export function Toolbar({
           onChange={(event) => setGilText(event.target.value)}
           onBlur={commitGil}
           className={numberInputClass}
-          aria-label="1ワードあたりの没収ギル"
+          aria-label="1ワードあたりの没収額"
         />
-        <span>ギル</span>
+        <span>{unit}</span>
       </label>
 
       <label className="ff-jp flex items-center gap-2 text-sm text-[#d9b6ff]">
-        <span>キリ番=</span>
+        <span>キリ番+</span>
         <input
           type="number"
           min={0}
@@ -86,9 +100,22 @@ export function Toolbar({
           onChange={(event) => setKiribanText(event.target.value)}
           onBlur={commitKiriban}
           className={`${numberInputClass} focus:ring-[#c89bff]/70`}
-          aria-label="キリ番（ゾロ目）到達時の没収ギル"
+          aria-label="キリ番（ゾロ目）到達時に加算する没収額"
         />
-        <span>ギル</span>
+        <span>{unit}</span>
+      </label>
+
+      <label className="ff-jp flex items-center gap-2 text-sm text-[var(--muted)]">
+        <span>単位=</span>
+        <input
+          type="text"
+          maxLength={16}
+          value={unitText}
+          onChange={(event) => setUnitText(event.target.value)}
+          onBlur={commitUnit}
+          className={`${numberInputClass} text-left`}
+          aria-label="没収額の単位（例: ギル、円、ポイント）"
+        />
       </label>
 
       <div className="ml-auto flex flex-wrap items-center gap-2">

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { APP_ID, DEFAULT_KIRIBAN_GIL } from './constants'
+import { APP_ID, DEFAULT_KIRIBAN_GIL, DEFAULT_UNIT } from './constants'
 
 // リソース枯渇（巨大ペイロード）を防ぐためのサイズ上限
 const MAX_STREAMERS = 64
@@ -8,6 +8,7 @@ const MAX_COUNT = 1_000_000
 const MAX_GIL = 1_000_000_000
 const MAX_ID_LENGTH = 100
 const MAX_NAME_LENGTH = 60
+const MAX_UNIT_LENGTH = 16
 
 /** 配信者 1 件 */
 export const streamerSchema = z.object({
@@ -31,6 +32,7 @@ export const appStateSchema = z.object({
   gilPerWord: z.number().int().min(0).max(MAX_GIL),
   // 旧バージョンの保存データ/ファイルにフィールドが無い場合は既定値で補う
   kiribanGil: z.number().int().min(0).max(MAX_GIL).default(DEFAULT_KIRIBAN_GIL),
+  unit: z.string().trim().min(1).max(MAX_UNIT_LENGTH).default(DEFAULT_UNIT),
 })
 
 /** エクスポートファイル（状態をメタ情報で包んだもの） */

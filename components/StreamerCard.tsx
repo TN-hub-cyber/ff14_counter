@@ -1,6 +1,7 @@
 'use client'
 
-import { formatGilMan, formatNumber } from '@/lib/format'
+import { useEffect, useRef, useState } from 'react'
+import { formatAmountMan, formatNumber } from '@/lib/format'
 import { isKiriban, streamerGil } from '@/lib/gil'
 import type { Streamer } from '@/lib/types'
 
@@ -8,6 +9,7 @@ interface StreamerCardProps {
   streamer: Streamer
   gilPerWord: number
   kiribanGil: number
+  unit: string
   isTopPayer: boolean
   index: number
   onAdjust: (streamerId: string, delta: number) => void
@@ -18,6 +20,7 @@ export function StreamerCard({
   streamer,
   gilPerWord,
   kiribanGil,
+  unit,
   isTopPayer,
   index,
   onAdjust,
@@ -25,6 +28,40 @@ export function StreamerCard({
 }: StreamerCardProps) {
   const gil = streamerGil(streamer.englishCount, gilPerWord, kiribanGil)
   const onKiriban = isKiriban(streamer.englishCount)
+
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (editing) {
+      inputRef.current?.focus()
+      inputRef.current?.select()
+    }
+  }, [editing])
+
+  function startEditing() {
+    setDraft(String(streamer.englishCount))
+    setEditing(true)
+  }
+
+  function commitEditing() {
+    const value = draft.trim() === '' ? 0 : Number(draft)
+    if (Number.isFinite(value) && value >= 0) {
+      onSetCount(streamer.id, Math.floor(value))
+    }
+    setEditing(false)
+  }
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      commitEditing()
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      setEditing(false)
+    }
+  }
 
   return (
     <div
@@ -45,24 +82,43 @@ export function StreamerCard({
           {streamer.name}
         </h3>
         <span className="ff-numeral ff-gold-text shrink-0 text-xs font-bold">
-          {formatGilMan(gil)}
+          {formatAmountMan(gil, unit)}
         </span>
       </div>
 
       <div className="flex items-end justify-center gap-1 py-1">
-        <span
-          className={`ff-numeral text-6xl font-black leading-none ${
-            onKiriban ? 'text-[#e6b3ff]' : 'ff-gold-text'
-          }`}
-        >
-          {formatNumber(streamer.englishCount)}
-        </span>
+        {editing ? (
+          <input
+            ref={inputRef}
+            type="number"
+            inputMode="numeric"
+            min={0}
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onBlur={commitEditing}
+            onKeyDown={handleKeyDown}
+            className="ff-numeral w-32 rounded-lg border border-[var(--border-gold-strong)] bg-black/40 px-2 py-1 text-center text-4xl font-black text-[var(--gold-bright)] focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/70"
+            aria-label={`${streamer.name} の回数を直接入力`}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={startEditing}
+            className={`ff-numeral cursor-text text-6xl font-black leading-none transition hover:opacity-80 ${
+              onKiriban ? 'text-[#e6b3ff]' : 'ff-gold-text'
+            }`}
+            title="クリックして回数を直接入力"
+            aria-label={`${streamer.name} の回数 ${streamer.englishCount}。クリックで直接入力`}
+          >
+            {formatNumber(streamer.englishCount)}
+          </button>
+        )}
         <span className="ff-jp mb-1 text-sm text-[var(--muted)]">回</span>
       </div>
 
       {onKiriban ? (
         <p className="ff-jp text-center text-[11px] font-bold tracking-widest text-[#e6b3ff]">
-          ✦ キリ番 {formatGilMan(kiribanGil)} ✦
+          ✦ キリ番 +{formatAmountMan(kiribanGil, unit)} ✦
         </p>
       ) : null}
 
@@ -70,7 +126,7 @@ export function StreamerCard({
         type="button"
         onClick={() => onAdjust(streamer.id, 1)}
         className="ff-jp rounded-xl border border-[var(--border-gold-strong)] bg-gradient-to-b from-[#f6e3a1] to-[#bb942f] py-3.5 text-2xl font-black text-[#2a210a] shadow-[0_6px_18px_rgba(212,175,55,0.28)] transition hover:from-[#fcefc4] hover:to-[#d0a534] active:translate-y-px"
-        aria-label={`${streamer.name} の英語回数を1増やす`}
+        aria-label={`${streamer.name} のNGワード回数を1増やす`}
       >
         ＋1
       </button>
@@ -81,7 +137,7 @@ export function StreamerCard({
           onClick={() => onAdjust(streamer.id, -1)}
           disabled={streamer.englishCount === 0}
           className="ff-jp rounded-lg border border-[var(--border-gold)] bg-white/5 py-2 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-35"
-          aria-label={`${streamer.name} の英語回数を1減らす`}
+          aria-label={`${streamer.name} のNGワード回数を1減らす`}
         >
           −1
         </button>
@@ -90,7 +146,7 @@ export function StreamerCard({
           onClick={() => onSetCount(streamer.id, 0)}
           disabled={streamer.englishCount === 0}
           className="ff-jp rounded-lg border border-[var(--border-gold)] bg-white/5 py-2 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-35"
-          aria-label={`${streamer.name} の英語回数を0に戻す`}
+          aria-label={`${streamer.name} のNGワード回数を0に戻す`}
         >
           0に戻す
         </button>

@@ -40,26 +40,26 @@ describe('streamerGil', () => {
     expect(streamerGil(10, gilPerWord, kiribanGil)).toBe(100_000)
   })
 
-  it('charges kiriban gil on the repdigit hit (11 -> 1,100,000)', () => {
-    // 1..10 = 10 * 10,000 = 100,000 ; 11回目 = 1,000,000 => 1,100,000
-    expect(streamerGil(11, gilPerWord, kiribanGil)).toBe(1_100_000)
+  it('adds the kiriban bonus on top of the per-word gil (11 -> 1,110,000)', () => {
+    // 1..11 = 11 * 10,000 = 110,000 ; 11回目にキリ番 +1,000,000 => 1,110,000
+    expect(streamerGil(11, gilPerWord, kiribanGil)).toBe(1_110_000)
   })
 
-  it('accumulates multiple kiriban hits (22 -> 2,200,000)', () => {
-    // kiriban at 11 and 22 -> 20 normal * 10,000 + 2 * 1,000,000
-    expect(streamerGil(22, gilPerWord, kiribanGil)).toBe(2_200_000)
+  it('accumulates multiple kiriban bonuses (22 -> 2,220,000)', () => {
+    // kiriban at 11 and 22 -> 22 * 10,000 + 2 * 1,000,000
+    expect(streamerGil(22, gilPerWord, kiribanGil)).toBe(2_220_000)
   })
 
-  it('drops back to per-word gil after passing a kiriban (12)', () => {
-    // 11 normal words (1..10, 12) + 1 kiriban (11) => 11*10,000 + 1,000,000
-    expect(streamerGil(12, gilPerWord, kiribanGil)).toBe(1_110_000)
+  it('drops back to per-word gil after passing a kiriban (12 -> 1,120,000)', () => {
+    // 12 * 10,000 + 1 kiriban (11) * 1,000,000 => 1,120,000
+    expect(streamerGil(12, gilPerWord, kiribanGil)).toBe(1_120_000)
   })
 
   it('equals the brute-force sum for a range of counts', () => {
     for (let count = 0; count <= 130; count += 1) {
       let expected = 0
       for (let k = 1; k <= count; k += 1) {
-        expected += isKiriban(k) ? kiribanGil : gilPerWord
+        expected += isKiriban(k) ? gilPerWord + kiribanGil : gilPerWord
       }
       expect(streamerGil(count, gilPerWord, kiribanGil)).toBe(expected)
     }

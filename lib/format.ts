@@ -5,18 +5,18 @@ export function formatNumber(value: number): string {
   return numberFormatter.format(value)
 }
 
-/** ギル表記（例: 1,230,000 ギル） */
-export function formatGil(value: number): string {
-  return `${formatNumber(value)} ギル`
+/** 単位つきの金額表記（例: 1,230,000 ギル） */
+export function formatAmount(value: number, unit: string): string {
+  return `${formatNumber(value)} ${unit}`
 }
 
 /**
- * ギルを「万」単位の読みやすい表記にする（例: 123 万ギル）。
+ * 金額を「万」単位の読みやすい表記にする（例: 123 万ギル）。
  * 端数がある場合は通常表記にフォールバックする。
  */
-export function formatGilMan(value: number): string {
+export function formatAmountMan(value: number, unit: string): string {
   if (value !== 0 && value % 10000 === 0) {
-    return `${formatNumber(value / 10000)} 万ギル`
+    return `${formatNumber(value / 10000)} 万${unit}`
   }
-  return formatGil(value)
+  return formatAmount(value, unit)
 }

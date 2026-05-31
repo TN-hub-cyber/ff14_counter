@@ -12,11 +12,22 @@ export const STREAMER_NAMES = [
   '夜真月しるし',
 ] as const
 
-/** 1 ワードにつき没収するギル（既定値） */
+/** 1 ワードにつき没収する額（既定値） */
 export const DEFAULT_GIL_PER_WORD = 10000
 
-/** キリ番（ゾロ目）到達時の没収ギル（既定値） */
+/** キリ番（ゾロ目）到達時に加算する額（既定値） */
 export const DEFAULT_KIRIBAN_GIL = 1_000_000
+
+/** 没収額の単位（既定値） */
+export const DEFAULT_UNIT = 'ギル'
+
+/** 参加者（配信者）の最大人数 */
+export const MAX_PARTICIPANTS = 8
+
+/** 既定の参加者名（追加時のプレースホルダ）。index は 0 始まり */
+export function defaultParticipantName(index: number): string {
+  return `配信者${index + 1}`
+}
 
 /** localStorage 保存キー（バージョン付き） */
 export const STORAGE_KEY = 'ff14-english-counter:v1'
@@ -39,5 +50,6 @@ export function createInitialState(): AppState {
     predictions: [],
     gilPerWord: DEFAULT_GIL_PER_WORD,
     kiribanGil: DEFAULT_KIRIBAN_GIL,
+    unit: DEFAULT_UNIT,
   }
 }

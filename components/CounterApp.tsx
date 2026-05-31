@@ -2,15 +2,22 @@
 
 import { useMemo, useState } from 'react'
 import { BoardTokenField } from './BoardTokenField'
+import { ParticipantSettings } from './ParticipantSettings'
 import { PredictionPanel } from './PredictionPanel'
 import { RulesNote } from './RulesNote'
 import { StreamerGrid } from './StreamerGrid'
 import { SummaryBar } from './SummaryBar'
 import { SyncStatus } from './SyncStatus'
 import { Toolbar } from './Toolbar'
+import { TotalPredictionBanner } from './TotalPredictionBanner'
 import { useAppState } from '@/hooks/useAppState'
 import { streamerGil } from '@/lib/gil'
-import { overallLeader, totalCount, totalGil } from '@/lib/state'
+import {
+  overallLeader,
+  rankTotalListeners,
+  totalCount,
+  totalGil,
+} from '@/lib/state'
 import {
   buildExportFile,
   downloadJson,
@@ -43,6 +50,7 @@ export function CounterApp() {
   const total = totalCount(state)
   const gil = totalGil(state)
   const leader = useMemo(() => overallLeader(state), [state])
+  const totalRanked = useMemo(() => rankTotalListeners(state), [state])
 
   const topPayerId = useMemo(() => {
     let bestId: string | null = null
@@ -84,9 +92,22 @@ export function CounterApp() {
   }
 
   function handleResetCounts() {
-    if (window.confirm('全員の英語回数を0に戻します。予想はそのままです。よろしいですか？')) {
+    if (window.confirm('全員のNGワード回数を0に戻します。予想はそのままです。よろしいですか？')) {
       app.resetCounts()
     }
+  }
+
+  function handleParticipantCountChange(count: number) {
+    // 人数を減らす場合は末尾の配信者とその予想が消えるため確認する
+    if (
+      count < state.streamers.length &&
+      !window.confirm(
+        `参加者を ${count} 人に減らします。末尾の配信者の回数とその配信者あての予想は削除されます。よろしいですか？`,
+      )
+    ) {
+      return
+    }
+    app.setParticipantCount(count)
   }
 
   function handleResetAll() {
@@ -102,13 +123,13 @@ export function CounterApp() {
           <SyncStatus status={app.syncStatus} />
         </div>
         <p className="ff-display text-[10px] tracking-[0.5em] text-[var(--gold)]/70 sm:text-xs">
-          EORZEA · NO-ENGLISH CHALLENGE
+          NG WORD CHALLENGE
         </p>
         <h1 className="ff-display ff-gold-text text-4xl font-black leading-tight sm:text-6xl">
-          英語禁止配信 カウンター
+          NGワード配信カウンター
         </h1>
         <p className="ff-jp text-xs text-[var(--muted)] sm:text-sm">
-          配信者のカタカナ語をカウント／リスナーは配信者ごとに英語回数を予想
+          配信者のNGワードをカウント／リスナーは配信者ごとにNGワード回数を予想
         </p>
         <div className="ff-rule-diamond mt-1 w-full max-w-2xl" />
       </header>
@@ -116,6 +137,7 @@ export function CounterApp() {
       <SummaryBar
         totalCount={total}
         totalGil={gil}
+        unit={state.unit}
         predictionCount={state.predictions.length}
         leader={leader}
       />
@@ -126,19 +148,26 @@ export function CounterApp() {
           streamers={state.streamers}
           gilPerWord={state.gilPerWord}
           kiribanGil={state.kiribanGil}
+          unit={state.unit}
           topPayerId={topPayerId}
           onAdjust={app.adjustCount}
           onSetCount={app.setCount}
         />
       </section>
 
-      <section className="ff-panel flex flex-col gap-4 p-5 sm:p-6">
-        <SectionTitle>❖ リスナー予想（配信者ごと）</SectionTitle>
-        <PredictionPanel
-          state={state}
-          onAdd={app.addPrediction}
-          onRemove={app.removePrediction}
-        />
+      <section className="ff-panel flex flex-col gap-5 p-5 sm:p-6">
+        <SectionTitle>❖ リスナー予想</SectionTitle>
+        <TotalPredictionBanner ranked={totalRanked} actual={total} />
+        <div className="flex flex-col gap-4">
+          <span className="ff-jp text-xs font-bold tracking-[0.3em] text-[var(--gold)]/80">
+            配信者ごとの予想
+          </span>
+          <PredictionPanel
+            state={state}
+            onAdd={app.addPrediction}
+            onRemove={app.removePrediction}
+          />
+        </div>
       </section>
 
       <details className="ff-panel group px-5 py-4">
@@ -146,12 +175,20 @@ export function CounterApp() {
           <span>⚙ 設定・データ管理</span>
           <span className="text-xs font-normal text-[var(--muted)]">開閉</span>
         </summary>
-        <div className="mt-5 flex flex-col gap-4">
+        <div className="mt-5 flex flex-col gap-5">
+          <ParticipantSettings
+            streamers={state.streamers}
+            onNameChange={app.setStreamerName}
+            onCountChange={handleParticipantCountChange}
+          />
+          <div className="ff-rule" />
           <Toolbar
             gilPerWord={state.gilPerWord}
             kiribanGil={state.kiribanGil}
+            unit={state.unit}
             onGilPerWordChange={app.setGilPerWord}
             onKiribanGilChange={app.setKiribanGil}
+            onUnitChange={app.setUnit}
             onRefresh={app.refresh}
             onExport={handleExport}
             onImportFile={handleImportFile}

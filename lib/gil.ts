@@ -1,8 +1,9 @@
 /**
- * キリ番（ゾロ目）判定と没収ギルの計算。
+ * キリ番（ゾロ目）判定と没収額の計算。
  *
  * キリ番 = 11, 22, 33, ... 99, 111, 222, ... のように 2 桁以上で全桁が同じ数。
- * キリ番に到達した「その 1 回」は通常の 1 ワードギルではなくキリ番ギル（既定 100 万）で計算する。
+ * キリ番に到達した「その 1 回」は通常の 1 ワード分に加えてキリ番ボーナス（既定 100 万）を上乗せする。
+ * 例) 1 ワード=10000、キリ番=1000000 のとき、キリ番到達回の没収額は 1010000。
  */
 
 /** n がキリ番（ゾロ目・2桁以上）かどうか */
@@ -27,10 +28,10 @@ export function countKiribanUpTo(n: number): number {
 }
 
 /**
- * 配信者ひとりの没収ギルを計算する。
- * 通常ワードは gilPerWord、キリ番に到達した回はそれを kiribanGil に置き換える。
+ * 配信者ひとりの没収額を計算する。
+ * すべての回に gilPerWord を課し、キリ番に到達した回には kiribanGil を上乗せする。
  *
- * 合計 = count × gilPerWord + (キリ番到達数) × (kiribanGil − gilPerWord)
+ * 合計 = count × gilPerWord + (キリ番到達数) × kiribanGil
  */
 export function streamerGil(
   count: number,
@@ -39,5 +40,5 @@ export function streamerGil(
 ): number {
   if (count <= 0) return 0
   const kiribanHits = countKiribanUpTo(count)
-  return count * gilPerWord + kiribanHits * (kiribanGil - gilPerWord)
+  return count * gilPerWord + kiribanHits * kiribanGil
 }

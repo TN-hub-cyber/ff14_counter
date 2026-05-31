@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { BoardTokenField } from './BoardTokenField'
-import { PredictionForm } from './PredictionForm'
-import { PredictionList } from './PredictionList'
+import { PredictionPanel } from './PredictionPanel'
 import { RulesNote } from './RulesNote'
 import { StreamerGrid } from './StreamerGrid'
 import { SummaryBar } from './SummaryBar'
@@ -11,13 +10,12 @@ import { SyncStatus } from './SyncStatus'
 import { Toolbar } from './Toolbar'
 import { useAppState } from '@/hooks/useAppState'
 import { streamerGil } from '@/lib/gil'
-import { rankPredictions, totalCount, totalGil } from '@/lib/state'
+import { overallLeader, totalCount, totalGil } from '@/lib/state'
 import {
   buildExportFile,
   downloadJson,
   parseImportedState,
 } from '@/lib/storage'
-import type { PredictionSortKey } from '@/lib/types'
 
 function buildExportFilename(): string {
   const now = new Date()
@@ -40,21 +38,11 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 export function CounterApp() {
   const app = useAppState()
   const { state } = app
-  const [sortKey, setSortKey] = useState<PredictionSortKey>('diff-asc')
   const [importError, setImportError] = useState<string | null>(null)
 
   const total = totalCount(state)
   const gil = totalGil(state)
-  const ranked = useMemo(() => rankPredictions(state, sortKey), [state, sortKey])
-
-  const closest = useMemo(() => {
-    if (state.predictions.length === 0) return null
-    return state.predictions.reduce((best, current) => {
-      const currentDiff = Math.abs(current.predictedCount - total)
-      const bestDiff = Math.abs(best.predictedCount - total)
-      return currentDiff < bestDiff ? current : best
-    })
-  }, [state.predictions, total])
+  const leader = useMemo(() => overallLeader(state), [state])
 
   const topPayerId = useMemo(() => {
     let bestId: string | null = null
@@ -120,7 +108,7 @@ export function CounterApp() {
           英語禁止配信 カウンター
         </h1>
         <p className="ff-jp text-xs text-[var(--muted)] sm:text-sm">
-          配信者のカタカナ語をカウント／リスナーは「全員の合計回数」を予想
+          配信者のカタカナ語をカウント／リスナーは配信者ごとに英語回数を予想
         </p>
         <div className="ff-rule-diamond mt-1 w-full max-w-2xl" />
       </header>
@@ -129,7 +117,7 @@ export function CounterApp() {
         totalCount={total}
         totalGil={gil}
         predictionCount={state.predictions.length}
-        closest={closest}
+        leader={leader}
       />
 
       <section className="flex flex-col gap-4">
@@ -145,13 +133,10 @@ export function CounterApp() {
       </section>
 
       <section className="ff-panel flex flex-col gap-4 p-5 sm:p-6">
-        <SectionTitle>❖ リスナー予想（合計回数）</SectionTitle>
-        <PredictionForm onAdd={app.addPrediction} />
-        <PredictionList
-          ranked={ranked}
-          actualTotal={total}
-          sortKey={sortKey}
-          onSortChange={setSortKey}
+        <SectionTitle>❖ リスナー予想（配信者ごと）</SectionTitle>
+        <PredictionPanel
+          state={state}
+          onAdd={app.addPrediction}
           onRemove={app.removePrediction}
         />
       </section>

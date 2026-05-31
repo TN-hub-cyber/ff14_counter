@@ -11,11 +11,13 @@ export interface Streamer {
   readonly englishCount: number
 }
 
-/** リスナーが申告した「全配信者の合計英語回数」の予想 */
+/** リスナーが申告した「特定の配信者の英語回数」の予想 */
 export interface Prediction {
   readonly id: string
+  /** 予想対象の配信者 id */
+  readonly streamerId: string
   readonly listenerName: string
-  /** 合計回数の予想値。0 以上の整数 */
+  /** その配信者の英語回数の予想値。0 以上の整数 */
   readonly predictedCount: number
 }
 

@@ -26,7 +26,11 @@ export interface AppActions {
   adjustCount: (streamerId: string, delta: number) => void
   setCount: (streamerId: string, value: number) => void
   resetCounts: () => void
-  addPrediction: (input: { listenerName: string; predictedCount: number }) => void
+  addPrediction: (input: {
+    streamerId: string
+    listenerName: string
+    predictedCount: number
+  }) => void
   removePrediction: (predictionId: string) => void
   setGilPerWord: (value: number) => void
   setKiribanGil: (value: number) => void
@@ -156,6 +160,7 @@ export function useAppState(): UseAppStateResult {
       addPrediction: (input) => {
         const prediction: Prediction = {
           id: createId(),
+          streamerId: input.streamerId,
           listenerName: input.listenerName.trim(),
           predictedCount: input.predictedCount,
         }

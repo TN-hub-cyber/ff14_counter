@@ -5,7 +5,7 @@ import type { PredictionSortKey, RankedPrediction } from '@/lib/types'
 
 interface PredictionListProps {
   ranked: readonly RankedPrediction[]
-  actualTotal: number
+  actual: number
   sortKey: PredictionSortKey
   onSortChange: (sortKey: PredictionSortKey) => void
   onRemove: (predictionId: string) => void
@@ -20,7 +20,7 @@ const SORT_OPTIONS: { key: PredictionSortKey; label: string }[] = [
 
 export function PredictionList({
   ranked,
-  actualTotal,
+  actual,
   sortKey,
   onSortChange,
   onRemove,
@@ -48,7 +48,7 @@ export function PredictionList({
 
       {ranked.length === 0 ? (
         <p className="ff-jp rounded-lg border border-[var(--border-gold)]/60 bg-black/20 px-4 py-6 text-center text-sm text-[var(--muted)]">
-          まだ予想がありません。リスナーの予想を追加してください。
+          この配信者への予想はまだありません。リスナーの予想を追加してください。
         </p>
       ) : (
         <ul className="flex flex-col gap-2">
@@ -92,7 +92,7 @@ export function PredictionList({
       )}
 
       <p className="ff-jp text-xs text-[var(--muted)]/80">
-        現在の合計実績: {formatNumber(actualTotal)} 回 ／ 「最有力」は終了時の合計に最も近い予想です。
+        この配信者の現在の実績: {formatNumber(actual)} 回 ／ 「最有力」は終了時に最も近い予想です。
       </p>
     </div>
   )

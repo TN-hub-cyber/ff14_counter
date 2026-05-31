@@ -106,20 +106,28 @@ function comparator(
   }
 }
 
+/** 指定配信者の現在の英語回数を取得する */
+export function streamerCount(state: AppState, streamerId: string): number {
+  return state.streamers.find((s) => s.id === streamerId)?.englishCount ?? 0
+}
+
 /**
- * 予想に「実績との差」と「最近接フラグ」を付与し、指定キーでソートして返す。
- * 元の配列は変更しない。
+ * 指定配信者あての予想に「その配信者の実績との差」と「最近接フラグ」を付与し、
+ * 指定キーでソートして返す。元の配列は変更しない。
  */
-export function rankPredictions(
+export function rankStreamerPredictions(
   state: AppState,
+  streamerId: string,
   sortKey: PredictionSortKey,
 ): RankedPrediction[] {
-  const actual = totalCount(state)
-  const withDiff = state.predictions.map((prediction) => ({
-    ...prediction,
-    diff: Math.abs(prediction.predictedCount - actual),
-    isClosest: false,
-  }))
+  const actual = streamerCount(state, streamerId)
+  const withDiff = state.predictions
+    .filter((prediction) => prediction.streamerId === streamerId)
+    .map((prediction) => ({
+      ...prediction,
+      diff: Math.abs(prediction.predictedCount - actual),
+      isClosest: false,
+    }))
 
   const minDiff =
     withDiff.length > 0 ? Math.min(...withDiff.map((p) => p.diff)) : -1
@@ -130,4 +138,49 @@ export function rankPredictions(
   }))
 
   return ranked.sort(comparator(sortKey))
+}
+
+/** 配信者ごとの予想件数 */
+export function predictionCountByStreamer(
+  state: AppState,
+): Record<string, number> {
+  const counts: Record<string, number> = {}
+  for (const prediction of state.predictions) {
+    counts[prediction.streamerId] = (counts[prediction.streamerId] ?? 0) + 1
+  }
+  return counts
+}
+
+/**
+ * 総合首位: 最も多くの配信者で「最有力（実績に最も近い）」になっているリスナー。
+ * 各配信者ごとに最小差のリスナー全員を勝者として数える。予想が無ければ null。
+ */
+export function overallLeader(
+  state: AppState,
+): { listenerName: string; wins: number } | null {
+  const wins = new Map<string, number>()
+
+  for (const streamer of state.streamers) {
+    const list = state.predictions.filter((p) => p.streamerId === streamer.id)
+    if (list.length === 0) continue
+    const diffs = list.map((p) => ({
+      name: p.listenerName,
+      diff: Math.abs(p.predictedCount - streamer.englishCount),
+    }))
+    const minDiff = Math.min(...diffs.map((d) => d.diff))
+    const leaders = new Set(
+      diffs.filter((d) => d.diff === minDiff).map((d) => d.name),
+    )
+    for (const name of leaders) {
+      wins.set(name, (wins.get(name) ?? 0) + 1)
+    }
+  }
+
+  let best: { listenerName: string; wins: number } | null = null
+  for (const [listenerName, count] of wins) {
+    if (!best || count > best.wins) {
+      best = { listenerName, wins: count }
+    }
+  }
+  return best
 }

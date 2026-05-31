@@ -4,14 +4,14 @@ interface SummaryBarProps {
   totalCount: number
   totalGil: number
   predictionCount: number
-  closest: { listenerName: string; predictedCount: number } | null
+  leader: { listenerName: string; wins: number } | null
 }
 
 export function SummaryBar({
   totalCount,
   totalGil,
   predictionCount,
-  closest,
+  leader,
 }: SummaryBarProps) {
   return (
     <section className="ff-panel ff-rise grid grid-cols-1 items-center gap-6 px-6 py-7 sm:grid-cols-[1fr_auto_1fr] sm:gap-4">
@@ -40,16 +40,16 @@ export function SummaryBar({
         <div className="ff-rule-diamond mt-3 w-40" />
       </div>
 
-      {/* 右: 最有力予想 */}
+      {/* 右: 予想 総合首位（最も多くの配信者で最有力） */}
       <div className="flex flex-col items-center sm:items-end">
         <span className="ff-jp text-[11px] tracking-[0.35em] text-[var(--muted)]">
-          最有力予想者
+          予想 総合首位
         </span>
         <span className="ff-jp mt-1 max-w-full truncate text-3xl font-bold text-[var(--ink)] sm:text-4xl">
-          {closest ? closest.listenerName : '—'}
+          {leader ? leader.listenerName : '—'}
         </span>
         <span className="ff-jp mt-1 text-xs text-[var(--muted)]">
-          {closest ? `予想 ${formatNumber(closest.predictedCount)} 回` : '予想なし'}
+          {leader ? `${formatNumber(leader.wins)} 名の配信者で最有力` : '予想なし'}
         </span>
       </div>
     </section>

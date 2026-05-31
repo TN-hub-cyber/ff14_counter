@@ -3,7 +3,8 @@ import { createInitialState } from './constants'
 import {
   addPrediction,
   adjustCount,
-  rankPredictions,
+  overallLeader,
+  rankStreamerPredictions,
   removePrediction,
   resetCounts,
   setCount,
@@ -54,6 +55,7 @@ describe('resetCounts', () => {
     let state = adjustCount(baseState(), firstId, 5)
     state = addPrediction(state, {
       id: 'p1',
+      streamerId: firstId,
       listenerName: 'a',
       predictedCount: 10,
     })
@@ -90,51 +92,87 @@ describe('totals', () => {
   })
 })
 
-describe('predictions', () => {
-  const p = (id: string, name: string, count: number): Prediction => ({
-    id,
-    listenerName: name,
-    predictedCount: count,
-  })
+describe('predictions (per streamer)', () => {
+  const p = (
+    id: string,
+    streamerId: string,
+    name: string,
+    count: number,
+  ): Prediction => ({ id, streamerId, listenerName: name, predictedCount: count })
 
   it('adds and removes immutably', () => {
-    const added = addPrediction(baseState(), p('p1', 'taro', 20))
+    const added = addPrediction(baseState(), p('p1', firstId, 'taro', 20))
     expect(added.predictions).toHaveLength(1)
     const removed = removePrediction(added, 'p1')
     expect(removed.predictions).toHaveLength(0)
     expect(added.predictions).toHaveLength(1)
   })
 
-  it('marks the closest prediction to the actual total', () => {
-    let state = adjustCount(baseState(), firstId, 10) // total = 10
-    state = addPrediction(state, p('p1', 'far', 30))
-    state = addPrediction(state, p('p2', 'near', 12))
-    state = addPrediction(state, p('p3', 'mid', 5))
+  it('marks the closest prediction to that streamer actual count', () => {
+    let state = adjustCount(baseState(), firstId, 10) // s-0 actual = 10
+    state = addPrediction(state, p('p1', firstId, 'far', 30))
+    state = addPrediction(state, p('p2', firstId, 'near', 12))
+    state = addPrediction(state, p('p3', firstId, 'mid', 5))
 
-    const ranked = rankPredictions(state, 'diff-asc')
+    const ranked = rankStreamerPredictions(state, firstId, 'diff-asc')
     expect(ranked[0].id).toBe('p2')
     expect(ranked[0].isClosest).toBe(true)
     expect(ranked.find((r) => r.id === 'p1')?.isClosest).toBe(false)
   })
 
-  it('sorts by predicted count ascending and descending', () => {
-    let state = addPrediction(baseState(), p('p1', 'a', 30))
-    state = addPrediction(state, p('p2', 'b', 10))
-    state = addPrediction(state, p('p3', 'c', 20))
+  it('only includes predictions for the requested streamer', () => {
+    let state = addPrediction(baseState(), p('p1', firstId, 'a', 5))
+    state = addPrediction(state, p('p2', secondId, 'b', 9))
+    const ranked = rankStreamerPredictions(state, firstId, 'diff-asc')
+    expect(ranked).toHaveLength(1)
+    expect(ranked[0].id).toBe('p1')
+  })
 
-    expect(rankPredictions(state, 'count-asc').map((r) => r.predictedCount)).toEqual([
-      10, 20, 30,
-    ])
-    expect(rankPredictions(state, 'count-desc').map((r) => r.predictedCount)).toEqual([
-      30, 20, 10,
-    ])
+  it('sorts by predicted count ascending and descending', () => {
+    let state = addPrediction(baseState(), p('p1', firstId, 'a', 30))
+    state = addPrediction(state, p('p2', firstId, 'b', 10))
+    state = addPrediction(state, p('p3', firstId, 'c', 20))
+
+    expect(
+      rankStreamerPredictions(state, firstId, 'count-asc').map((r) => r.predictedCount),
+    ).toEqual([10, 20, 30])
+    expect(
+      rankStreamerPredictions(state, firstId, 'count-desc').map((r) => r.predictedCount),
+    ).toEqual([30, 20, 10])
   })
 
   it('handles ties for closest', () => {
-    let state = adjustCount(baseState(), firstId, 10) // total = 10
-    state = addPrediction(state, p('p1', 'a', 8)) // diff 2
-    state = addPrediction(state, p('p2', 'b', 12)) // diff 2
-    const ranked = rankPredictions(state, 'diff-asc')
+    let state = adjustCount(baseState(), firstId, 10)
+    state = addPrediction(state, p('p1', firstId, 'a', 8)) // diff 2
+    state = addPrediction(state, p('p2', firstId, 'b', 12)) // diff 2
+    const ranked = rankStreamerPredictions(state, firstId, 'diff-asc')
     expect(ranked.filter((r) => r.isClosest)).toHaveLength(2)
+  })
+})
+
+describe('overallLeader', () => {
+  const p = (
+    id: string,
+    streamerId: string,
+    name: string,
+    count: number,
+  ): Prediction => ({ id, streamerId, listenerName: name, predictedCount: count })
+
+  it('returns null when there are no predictions', () => {
+    expect(overallLeader(baseState())).toBeNull()
+  })
+
+  it('picks the listener leading the most streamers', () => {
+    let state = adjustCount(baseState(), firstId, 10) // s-0 actual 10
+    state = adjustCount(state, secondId, 4) // s-1 actual 4
+    // taro: closest on s-0 (10) and s-1 (4) -> 2 wins
+    state = addPrediction(state, p('p1', firstId, 'taro', 10))
+    state = addPrediction(state, p('p2', firstId, 'jiro', 30))
+    state = addPrediction(state, p('p3', secondId, 'taro', 4))
+    state = addPrediction(state, p('p4', secondId, 'jiro', 20))
+
+    const leader = overallLeader(state)
+    expect(leader?.listenerName).toBe('taro')
+    expect(leader?.wins).toBe(2)
   })
 })

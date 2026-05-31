@@ -19,6 +19,7 @@ export const streamerSchema = z.object({
 /** 予想 1 件（DB に永続化される。フォーム検証と同等の上限を課す） */
 export const predictionSchema = z.object({
   id: z.string().min(1).max(MAX_ID_LENGTH),
+  streamerId: z.string().min(1).max(MAX_ID_LENGTH),
   listenerName: z.string().min(1).max(MAX_NAME_LENGTH),
   predictedCount: z.number().int().min(0).max(MAX_COUNT),
 })

@@ -52,9 +52,9 @@ export function PredictionForm({ onAdd }: PredictionFormProps) {
           min={0}
           value={predictedCount}
           onChange={(event) => setPredictedCount(event.target.value)}
-          placeholder="予想合計回数"
+          placeholder="予想回数"
           className={`w-full sm:w-40 ${inputClass}`}
-          aria-label="予想合計回数"
+          aria-label="予想回数"
         />
         <button
           type="submit"

@@ -4,12 +4,12 @@ import { useMemo, useState } from 'react'
 import { BoardTokenField } from './BoardTokenField'
 import { ParticipantSettings } from './ParticipantSettings'
 import { PredictionPanel } from './PredictionPanel'
-import { RulesNote } from './RulesNote'
 import { StreamerGrid } from './StreamerGrid'
 import { SummaryBar } from './SummaryBar'
 import { SyncStatus } from './SyncStatus'
 import { Toolbar } from './Toolbar'
 import { TotalPredictionBanner } from './TotalPredictionBanner'
+import { UsageNote } from './UsageNote'
 import { useAppState } from '@/hooks/useAppState'
 import { streamerGil } from '@/lib/gil'
 import {
@@ -206,7 +206,7 @@ export function CounterApp() {
         </div>
       </details>
 
-      <RulesNote />
+      <UsageNote />
 
       <footer className="ff-jp pb-4 text-center text-xs text-[var(--muted)]/70">
         データはデータベースに自動保存され、複数端末で共有されます（オフライン時は端末内に一時保存）。
